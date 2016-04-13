@@ -1,21 +1,31 @@
-{MochaRunner, BaseReporter} = require("meteor/practicalmeteor:mocha")
+{MochaRunner} = require("meteor/practicalmeteor:mocha")
+{ConsoleReporter} = require("meteor/practicalmeteor:mocha-console-runner")
 
-class XUnitReporter extends BaseReporter
+class XUnitReporter extends ConsoleReporter
 
   xUnitPrefix: "##_meteor_magic##xunit: "
 
   constructor:(@clientRunner, @serverRunner, @options)->
-    super(@clientRunner, @options)
 
-    @clientStats = @stats
+    # ConsoleReporter exposes global variables that indicates when the tests has finished,
+    # so we register the event to print the test suite before ConsoleReporter register its event
+    MochaRunner.on "end all", => @printTestSuite()
+
+    super(@clientRunner, @serverRunner, @options)
+
     @clientTests = []
     @serverTests = []
 
-    @_addEventsToRunner('client')
-    @_addEventsToRunner('server')
+    @serverRunner.on "start", ->
 
+    @registerRunnerEvents('client')
+    @registerRunnerEvents('server')
 
-  _addEventsToRunner:(where)->
+  ###
+    Overwrite from ConsoleReporter, this function it's call from the constructor of ConsoleReporter
+  ###
+  registerRunnerEvents:(where)->
+
 
     @[where + "Runner"].on 'pending', (test) =>
       @[where+"Tests"].push test
@@ -26,30 +36,19 @@ class XUnitReporter extends BaseReporter
     @[where + "Runner"].on 'fail', (test) =>
       @[where+"Tests"].push test
 
-    @[where + "Runner"].on 'end', (stats)=>
-
-      if where is "client"
-        @clientTestsEnded = true
-      else
-        @serverTestsEnded = true
-        @serverStats = stats
-
-      # Only when both runner has ended running print test suite
-      # i.e @serverTestsEnded
-      if @clientTestsEnded and @serverTestsEnded
-        @printTestSuite()
+    super(where)
 
   printTestSuite: ->
 
     testSuite = {
       name: 'Mocha Tests'
-      tests: @clientStats.tests + @serverStats.tests
-      failures: @clientStats.failures + @serverStats.failures
-      errors: @clientStats.failures + @serverStats.failures
+      tests: @stats.tests
+      failures: @stats.failures
+      errors: @stats.failures
       timestamp: (new Date).toUTCString()
-      time: (@clientStats.duration + @serverStats.duration) / 1000 or 0
+      time: @stats.duration/ 1000 or 0
+      skipped: @stats.tests - @stats.failures - @stats.passes
     }
-    testSuite.skipped =  testSuite.tests - (testSuite.failures) - (@clientStats.passes + @serverRunner.passes)
 
     @write @createTag('testsuite', testSuite, false)
 
@@ -61,10 +60,6 @@ class XUnitReporter extends BaseReporter
 
     @write '</testsuite>'
 
-    window.TEST_STATUS = {FAILURES: testSuite.failures, DONE: true}
-    window.DONE = true
-    window.FAILURES = testSuite.failures
-
 
   ###*
   # HTML tag helper.
@@ -75,7 +70,7 @@ class XUnitReporter extends BaseReporter
   # @param content
   # @return {string}
   ###
-  createTag: (name, attrs, close, content) ->
+  createTag: (name, attrs = {}, close, content) ->
     end = if close then '/>' else '>'
     pairs = []
     tag = undefined
@@ -166,9 +161,11 @@ class XUnitReporter extends BaseReporter
   escapeStack: (stack = "")->
 
     return stack.split("\n")
-      .map( (s) => "##_meteor_magic##xunit: " + @escape(s))
+      .map( (s) => @xUnitPrefix + @escape(s))
       .join("\n")
 
+
+module.exports.XUnitReporter = XUnitReporter
 
 module.exports.runTests = ->
   MochaRunner.setReporter(XUnitReporter)

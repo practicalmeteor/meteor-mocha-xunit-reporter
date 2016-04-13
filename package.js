@@ -14,10 +14,10 @@ Package.describe({
 Package.onUse(function(api) {
   api.versionsFrom('1.3');
   api.use("coffeescript");
-  api.use("practicalmeteor:mocha");
+  api.use("practicalmeteor:mocha-console-runner@0.2.1-rc.1");
   api.use('ecmascript');
 
-  api.mainModule('XunitReporter.coffee');
+  api.mainModule('XunitReporter.coffee', 'client');
   api.export("runTests")
 });
 
