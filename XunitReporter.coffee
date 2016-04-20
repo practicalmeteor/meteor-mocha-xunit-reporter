@@ -42,12 +42,12 @@ class XUnitReporter extends ConsoleReporter
 
     testSuite = {
       name: 'Mocha Tests'
-      tests: @stats.tests
+      tests: @stats.total
       failures: @stats.failures
       errors: @stats.failures
       timestamp: (new Date).toUTCString()
       time: @stats.duration/ 1000 or 0
-      skipped: @stats.tests - @stats.failures - @stats.passes
+      skipped: @stats.pending
     }
 
     @write @createTag('testsuite', testSuite, false)
