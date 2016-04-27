@@ -3,9 +3,13 @@
 
 class XUnitReporter extends ConsoleReporter
 
+  @VERSION: "0.1.0-rc.2"
   xUnitPrefix: "##_meteor_magic##xunit: "
 
   constructor:(@clientRunner, @serverRunner, @options)->
+
+    @clientTests = []
+    @serverTests = []
 
     # ConsoleReporter exposes global variables that indicates when the tests has finished,
     # so we register the event to print the test suite before ConsoleReporter register its event
@@ -13,19 +17,13 @@ class XUnitReporter extends ConsoleReporter
 
     super(@clientRunner, @serverRunner, @options)
 
-    @clientTests = []
-    @serverTests = []
-
-    @serverRunner.on "start", ->
-
-    @registerRunnerEvents('client')
-    @registerRunnerEvents('server')
 
   ###
-    Overwrite from ConsoleReporter, this function it's call from the constructor of ConsoleReporter
+    Overwrite from ConsoleReporter
   ###
   registerRunnerEvents:(where)->
 
+    super(where)
 
     @[where + "Runner"].on 'pending', (test) =>
       @[where+"Tests"].push test
@@ -36,7 +34,6 @@ class XUnitReporter extends ConsoleReporter
     @[where + "Runner"].on 'fail', (test) =>
       @[where+"Tests"].push test
 
-    super(where)
 
   printTestSuite: ->
 

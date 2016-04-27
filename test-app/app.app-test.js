@@ -4,10 +4,12 @@ import TestCollection from "./import/collections/TestCollection"
 
 if (Meteor.isClient) {
   var {ConsoleReporter}  = require("meteor/practicalmeteor:mocha-console-runner");
+  var {XUnitReporter}  = require("meteor/practicalmeteor:mocha-xunit-reporter");
   console.log("------------------------------------------------");
   console.log("----------------PACKAGE VERSIONS----------------");
   console.log("practicalmeteor:mocha:", MochaRunner.VERSION);
   console.log("practicalmeteor:mocha-console-runner:", ConsoleReporter.VERSION);
+  console.log("practicalmeteor:mocha-xunit-reporter:", XUnitReporter.VERSION);
   console.log("------------------------------------------------");
   console.log("------------------------------------------------");
 }

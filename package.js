@@ -1,6 +1,6 @@
 Package.describe({
   name: 'practicalmeteor:mocha-xunit-reporter',
-  version: '0.1.0-rc.1',
+  version: '0.1.0-rc.2',
   // Brief, one-line summary of the package.
   summary: 'XUnit reporter for mocha',
   // URL to the Git repository containing the source code for this package.
@@ -14,7 +14,7 @@ Package.describe({
 Package.onUse(function(api) {
   api.versionsFrom('1.3');
   api.use("coffeescript");
-  api.use("practicalmeteor:mocha-console-runner@0.2.1-rc.2");
+  api.use("practicalmeteor:mocha-console-runner@0.2.1-rc.3");
   api.use('ecmascript');
 
   api.mainModule('XunitReporter.coffee', 'client');
