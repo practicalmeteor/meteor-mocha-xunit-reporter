@@ -3,7 +3,7 @@
 
 class XUnitReporter extends ConsoleReporter
 
-  @VERSION: "0.1.0-rc.2"
+  @VERSION: "0.1.0"
   xUnitPrefix: "##_meteor_magic##xunit: "
 
   constructor:(@clientRunner, @serverRunner, @options)->
